@@ -14,9 +14,10 @@ class CreateApplicationTable extends Migration
     public function up()
     {
         Schema::create('application', function (Blueprint $table) {
-            $table->increments('id');            
+            $table->bigIncrements('id');            
             $table->String('name');
             $table->String('icon');
+            $table->boolean('active')->default('1');
             $table->timestamps();
         });
     }
