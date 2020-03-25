@@ -46,9 +46,9 @@ class UserController extends Controller {
                     }
                 }
                 
-        } else {
-            $response['error_msg'] = 'Nothing to create';
-        }   
+            } else {
+                $response['error_msg'] = 'Nothing to create';
+            }   
 
         return response($response,$response['code']);
     }
