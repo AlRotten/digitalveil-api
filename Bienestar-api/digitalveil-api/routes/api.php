@@ -32,6 +32,8 @@ Route::get('/user/{id}', 'UserController@get' );
 Route::post('/user', 'UserController@create' );
 Route::post('/user/login', 'UserController@login' );
 Route::post('/user/password/reset', 'UserController@sendMail');
+
+//NOT TESTED
 Route::post('/user/{id}/delete', 'UserController@delete' );
 
 /* --------- APPLICATION SERVICE ---------- */
@@ -50,8 +52,10 @@ Route::get('/restriction/{id}', 'RestrictionController@getAll' );
 Route::get('/restriction/{id}/app/{appId}', 'RestrictionController@get' );
 
 Route::post('/restriction', 'RestrictionController@create' );
+
+Route::post('/restriction/delete', 'RestrictionController@delete');
+//NOT TESTED
 Route::post('/restriction/{id}', 'RestrictionController@update' );
-Route::post('/restriction/{id}/delete', 'RestrictionController@delete');
 
 /* --------- STATISTICS SERVICE ---------- */
 
