@@ -46,13 +46,16 @@ class UsageController extends Controller {
             $existingApplication = Application::where('name', '=', $application)->first();
 
             //App exists on the data base
-            if (isset($existingApplication)) {
+            if (!empty($existingApplication)) {
 
-                //TODO
-                $usageStoraged = Usage::where('day', date('Y-m-d H:i:s', strtotime($openDate)))->first();
-
-                //Call of check if storaged function
-                $response = $this->checkStoragedUsage($usageStoraged, $openDate, $timeUsed, $openLocation, $user->id, $existingApplication->id, $application);
+                //Call of check storaged function
+                try {
+                    $usageStoraged = Usage::where('day', date('Y-m-d H:i:s', strtotime($openDate)))->first();
+                    //Check and create Usage in case that doesn't exist
+                    $response = $this->checkStoragedUsage($usageStoraged, $openDate, $timeUsed, $openLocation, $user->id, $existingApplication->id, $application);
+                } catch (\Throwable $exception) {
+                    $response = array('code' => 500, 'applicationCode' => 500, 'msg' => 'There was an error getting the new usage for the application "' . $application->name . '"', 'error_msg' => $exception->getMessage());
+                }
 
             } else {
                 //Create Application if doesn't exist
@@ -66,11 +69,16 @@ class UsageController extends Controller {
                 } catch (\Throwable $exception) {
                     $response = array('code' => 500, 'applicationCode' => 500, 'msg' => 'There was an error creating the new application "' . $application . '"', 'error_msg' => $exception->getMessage());
                 }
-                
-                //Create Usage
-                $response = $this->checkStoragedUsage($usageStoraged, $openDate, $timeUsed, $openLocation, $user->id, $existingApplication->id, $application);
-            }               
 
+                //Call of check storaged function
+                try {
+                    $usageStoraged = Usage::where('day', date('Y-m-d H:i:s', strtotime($openDate)))->first();
+                    //Check and create Usage in case that doesn't exist
+                    $response = $this->checkStoragedUsage($usageStoraged, $openDate, $timeUsed, $openLocation, $user->id, $existingApplication->id, $application);
+                } catch (\Throwable $exception) {
+                    $response = array('code' => 500, 'applicationCode' => 500, 'msg' => 'There was an error getting the new usage for the application', 'error_msg' => $exception->getMessage());
+                }
+            }               
 
         }
 
