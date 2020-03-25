@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Restriction;
 use App\User;
+use App\Application;
 use DB;
 
 class RestrictionController extends Controller {
@@ -133,16 +134,69 @@ class RestrictionController extends Controller {
         return $response;
     }
 
-    //TODO - Still not implemented
-    public function destroy(Request $request) {
-        $restriction = restriction::where('id',$request->id)->first();
-         if (isset($restriction)) {
-            $restriction->delete();
-            return response()->json(["Success" => "Se ha modificado la restriccion."]);
-            
-        }else{
-            return response()->json(["Error" => "La restriccion no existe"]);
+    //TODO - Still not implemented - to test
+    public function delete(Request $request) {
+        //Response array initiallization
+        $response = array('code' => 400, 'error_msg' => []);
+
+        //Check if we receive data
+        if (isset($request)){
+            //Request Validation
+            if (!$request->id) array_push($response['error_msg'], 'User id is required');
+            if (!$request->appId) array_push($response['error_msg'], 'Application id is required');
+            if (!count($response['error_msg']) > 0) {
+                
+                //Get user and check if exists
+                try {
+                    $user = User::where('id', '=', $request->id)->first();
+                    $response = array('code' => '','userCode' => 200, 'user' => $user, 'msg' => '');
+
+                    if (!empty($user)){
+                        //Get application and check if exists
+                        try {
+                            $application = Application::where('id', '=', $request->appId)->first();
+                            $response = array('code' => '','applicationCode' => 200,'userCode' => 200, 'user' => $user, 'application' => $application, 'msg' => '');
+
+                            if (!empty($application)) {
+                                //Get the restriction we want to delete
+                                try {
+                                    $restriction = restriction::where('user_id',$user->id)->where('application_id', $application->id)->first();
+
+                                    //Check if exists
+                                    if (isset($restriction)) {
+                                        $restriction->delete();
+                                        $response = array('code' => 200, 'restriction' => $restriction, 'msg' => 'Restriction deleted');
+                                    } else {
+                                        $response = array('code' => 500, 'error_msg' => $exception->getMessage());
+                                    }      
+
+                                } catch (\Throwable $exception) {
+                                    $response = array('code' => 500, 'msg' => "There was an error deleting the restriction", 'error_msg' => $exception->getMessage());
+                                }
+
+                            } else {
+                                $response = array('code' => 400, 'userCode' => 200, 'applicationCode' => 400, 'user' => $user, 'application' => '' ,'error_msg' => 'Application doesnt exists');
+                            }
+
+                        } catch (\Throwable $exception) {
+                            $response = array('code' => 500,'userCode' => 200, 'applicationCode' => 500, 'user' => $user,'application' => '', 'error_msg' => 'There was an error trying to get the application which has the restriction');
+                        }
+
+                    } else {
+                        $response = array('code' => 400, 'userCode' => 400, 'user' => '', 'error_msg' => 'User doesnt exists');
+                    }
+
+                } catch (\Throwable $exception) {
+                    $response = array('code' => 500,'userCode' => 500, 'user' => '', 'error_msg' => 'There was an error trying to get the user who has the restriction');
+                }
+
+            }
+
+        } else {
+            $response['error_msg'] = 'No data received to update';
         }
+
+        return $response;
     }
 
 }
